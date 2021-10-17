@@ -14,6 +14,14 @@ resource "aws_subnet" "private-subnet" {
   map_public_ip_on_launch = false
 }
 
+resource "aws_subnet" "private-subnet-2" {
+  vpc_id                  = aws_vpc.dd_vpc.id
+  cidr_block              = "10.0.3.0/24"
+  availability_zone       = "us-west-2c"
+  map_public_ip_on_launch = false
+}
+
+
 # internet gateway for the vpc
 resource "aws_internet_gateway" "myvpc-igw" {
   vpc_id = aws_vpc.dd_vpc.id
@@ -43,7 +51,7 @@ resource "aws_route_table" "private-rtb" {
   vpc_id = aws_vpc.dd_vpc.id
 
   tags = {
-    Name = "rtb-for-private-subnet"
+    Name = "rtb-for-private-subnets"
   }
 }
 resource "aws_route_table_association" "assoc-private" {
@@ -51,16 +59,21 @@ resource "aws_route_table_association" "assoc-private" {
   route_table_id = aws_route_table.private-rtb.id
 }
 
-resource "aws_iam_instance_profile" "test_profile" {
-  name = "test_profile"
+resource "aws_route_table_association" "assoc-private-2" {
+  subnet_id      = aws_subnet.private-subnet-2.id
+  route_table_id = aws_route_table.private-rtb.id
+}
 
-  # instead of dac_test_role, you can use aws_iam_role instance
+resource "aws_iam_instance_profile" "s3_profile" {
+  name = "s3_profile"
+
+  # instead of s3_role, you can use aws_iam_role instance
   role = aws_iam_role.instance.name
 }
 
-resource "aws_iam_role_policy" "test_policy" {
-  name = "test_policy"
-  role = aws_iam_role.dac_test_role.id
+resource "aws_iam_role_policy" "s3_policy" {
+  name = "s3_policy"
+  role = aws_iam_role.s3_role.id
 
   policy = <<EOF
 {
@@ -95,8 +108,8 @@ data "aws_iam_policy_document" "instance_assume_role_policy" {
 }
 
 
-resource "aws_iam_role" "dac_test_role" {
-  name               = "dac_test_role"
+resource "aws_iam_role" "s3_role" {
+  name               = "s3_role"
   assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json
 
 }

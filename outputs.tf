@@ -20,8 +20,12 @@ output "private_subnet_id" {
   value       = aws_subnet.private-subnet.id
 }
 
+output "private_subnet_2_id" {
+  description = "private subnet-2 id"
+  value       = aws_subnet.private-subnet-2.id
+}
 
 output "aws_iam_instance_profile" {
   description = "aws_iam_instance_profile"
-  value       = aws_iam_instance_profile.test_profile.id
+  value       = aws_iam_instance_profile.s3_profile.id
 }
